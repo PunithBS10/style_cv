@@ -3,15 +3,19 @@ import { useNavigate } from 'react-router-dom';
 import { useDropzone } from 'react-dropzone';
 import { useCV } from '../context/CVContext';
 import { parseUploadedCV, extractTextFromPDF, extractTextFromDOCX } from '../services/openaiService';
+import { useAuth } from '../context/AuthContext';
+import AuthModal from '../components/AuthModal';
 import { Upload, FileText, ArrowRight, Loader, AlertCircle, ArrowLeft } from 'lucide-react';
 
 export default function UploadPage() {
     const navigate = useNavigate();
     const { setCvData, setCurrentStep, setIsProcessing } = useCV();
+    const { user } = useAuth();
     const [file, setFile] = useState(null);
     const [status, setStatus] = useState('idle');
     const [error, setError] = useState('');
     const [progress, setProgress] = useState(0);
+    const [showAuthModal, setShowAuthModal] = useState(false);
 
     const onDrop = useCallback((accepted, rejected) => {
         if (rejected.length > 0) {
@@ -37,6 +41,16 @@ export default function UploadPage() {
 
     const handleParse = async () => {
         if (!file) return;
+
+        // Check Freemium Limit
+        if (!user) {
+            const currentTries = parseInt(localStorage.getItem('freeCvTries') || '0', 10);
+            if (currentTries >= 3) {
+                setShowAuthModal(true);
+                return;
+            }
+        }
+
         try {
             setStatus('parsing');
             setError('');
@@ -62,6 +76,12 @@ export default function UploadPage() {
             setStatus('done');
             setIsProcessing(false);
 
+            // Increment usage counter for guests on success
+            if (!user) {
+                const currentTries = parseInt(localStorage.getItem('freeCvTries') || '0', 10);
+                localStorage.setItem('freeCvTries', (currentTries + 1).toString());
+            }
+
             setTimeout(() => {
                 setCurrentStep(1);
                 navigate('/input');
@@ -75,6 +95,15 @@ export default function UploadPage() {
     };
 
     const skipToManual = () => {
+        if (!user) {
+            const currentTries = parseInt(localStorage.getItem('freeCvTries') || '0', 10);
+            if (currentTries >= 3) {
+                setShowAuthModal(true);
+                return;
+            }
+            localStorage.setItem('freeCvTries', (currentTries + 1).toString());
+        }
+
         setCurrentStep(1);
         navigate('/input');
     };
@@ -162,6 +191,13 @@ export default function UploadPage() {
             >
                 Skip — I'll enter details manually
             </p>
+
+            <AuthModal
+                isOpen={showAuthModal}
+                onClose={() => setShowAuthModal(false)}
+                title="Free Limit Reached"
+                message="You've used your 3 free CV creations! Create a free account to save your progress, unlock unlimited CVs, and access all AI tailoring features."
+            />
         </div>
     );
 }

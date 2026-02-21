@@ -132,18 +132,10 @@ function AppRoutes() {
             <ProtectedRoute><ProfilePage /></ProtectedRoute>
           } />
 
-          <Route path="/upload" element={
-            <ProtectedRoute><UploadPage /></ProtectedRoute>
-          } />
-          <Route path="/input" element={
-            <ProtectedRoute><InputPage /></ProtectedRoute>
-          } />
-          <Route path="/templates" element={
-            <ProtectedRoute><TemplatePage /></ProtectedRoute>
-          } />
-          <Route path="/preview" element={
-            <ProtectedRoute><PreviewPage /></ProtectedRoute>
-          } />
+          <Route path="/upload" element={<UploadPage />} />
+          <Route path="/input" element={<InputPage />} />
+          <Route path="/templates" element={<TemplatePage />} />
+          <Route path="/preview" element={<PreviewPage />} />
         </Routes>
       </main>
     </>
