@@ -9,6 +9,7 @@ import TemplatePage from './pages/TemplatePage';
 import PreviewPage from './pages/PreviewPage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
+import ProfilePage from './pages/ProfilePage';
 import { Sun, Moon, LogOut, User } from 'lucide-react';
 
 const steps = [
@@ -77,11 +78,6 @@ function Navbar() {
     navigate('/');
   };
 
-  const handleSignOut = async () => {
-    await signOut();
-    navigate('/login');
-  };
-
   return (
     <nav className="navbar">
       <div className="navbar-inner">
@@ -108,8 +104,8 @@ function Navbar() {
             <ThemeToggle />
 
             {user ? (
-              <button className="btn btn-ghost" onClick={handleSignOut} title="Sign Out">
-                <LogOut size={16} />
+              <button className="btn btn-ghost" onClick={() => navigate('/profile')} title="Profile Layout">
+                <User size={16} />
               </button>
             ) : (
               <button className="btn btn-primary" onClick={() => navigate('/login')} style={{ padding: '0.4rem 0.8rem' }}>
@@ -132,6 +128,9 @@ function AppRoutes() {
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
+          <Route path="/profile" element={
+            <ProtectedRoute><ProfilePage /></ProtectedRoute>
+          } />
 
           <Route path="/upload" element={
             <ProtectedRoute><UploadPage /></ProtectedRoute>

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDropzone } from 'react-dropzone';
 import { useCV } from '../context/CVContext';
 import { parseUploadedCV, extractTextFromPDF, extractTextFromDOCX } from '../services/openaiService';
-import { Upload, FileText, ArrowRight, Loader, AlertCircle } from 'lucide-react';
+import { Upload, FileText, ArrowRight, Loader, AlertCircle, ArrowLeft } from 'lucide-react';
 
 export default function UploadPage() {
     const navigate = useNavigate();
@@ -130,7 +130,10 @@ export default function UploadPage() {
                 </div>
             )}
 
-            <div style={{ textAlign: 'center', marginTop: '1.25rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1.25rem' }}>
+                <button className="btn btn-ghost" onClick={() => navigate('/')}>
+                    <ArrowLeft size={14} /> Back
+                </button>
                 <button
                     className="btn btn-primary btn-lg"
                     onClick={handleParse}
@@ -149,7 +152,7 @@ export default function UploadPage() {
 
             <p
                 style={{
-                    textAlign: 'center',
+                    textAlign: 'right',
                     marginTop: '0.85rem',
                     color: 'var(--text-muted)',
                     fontSize: '0.82rem',

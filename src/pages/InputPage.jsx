@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useCV } from '../context/CVContext';
-import { ArrowRight, Plus, Trash2, Briefcase, GraduationCap, User, Wrench, Award, Heart, FileText } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Plus, Trash2, Briefcase, GraduationCap, User, Wrench, Award, Heart, FileText } from 'lucide-react';
 
 export default function InputPage() {
     const navigate = useNavigate();
@@ -263,7 +263,10 @@ export default function InputPage() {
                 </div>
             </div>
 
-            <div style={{ textAlign: 'center' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1.5rem' }}>
+                <button className="btn btn-ghost" onClick={() => { setCurrentStep(0); navigate('/upload'); }}>
+                    <ArrowLeft size={14} /> Back
+                </button>
                 <button className="btn btn-primary btn-lg" onClick={handleContinue}>
                     Choose template <ArrowRight size={14} />
                 </button>
