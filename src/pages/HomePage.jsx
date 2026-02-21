@@ -20,15 +20,16 @@ export default function HomePage() {
         <div className="page-container">
             <div className="hero">
                 <h1 className="hero-title">
-                    Build your <span style={{ color: 'var(--accent)' }}>professional CV</span>
+                    Build your <span style={{ color: 'var(--accent)' }}>customized CV</span>
                 </h1>
                 <p className="hero-subtitle">
-                    Upload an existing resume or start from scratch. Tailor it
-                    to any job with AI and download a beautifully formatted PDF.
+                    Upload your current resume or start from scratch. Our AI will
+                    <strong> tailor and customize</strong> your content to match any job description,
+                    creating a perfect ATS-friendly PDF.
                 </p>
                 <div className="hero-buttons">
                     <button className="btn btn-primary btn-lg" onClick={handleUpload}>
-                        <Upload size={16} /> Upload CV
+                        <Upload size={16} /> Upload Existing CV
                     </button>
                     <button className="btn btn-secondary btn-lg" onClick={handleManual}>
                         <FileText size={16} /> Start from scratch
