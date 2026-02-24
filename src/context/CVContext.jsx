@@ -15,16 +15,26 @@ const emptyCV = {
     summary: '',
     photoUrl: '',
   },
-  experience: [
+  "experience": [
     {
-      id: crypto.randomUUID(),
-      jobTitle: '',
-      company: '',
-      startDate: '',
-      endDate: '',
-      current: false,
-      bullets: [''],
-    },
+      "id": crypto.randomUUID(),
+      "jobTitle": "",
+      "company": "",
+      "startDate": "",
+      "endDate": "",
+      "current": false,
+      "bullets": [""]
+    }
+  ],
+  "projects": [
+    {
+      "id": crypto.randomUUID(),
+      "name": "",
+      "technologies": "",
+      "startDate": "",
+      "endDate": "",
+      "bullets": [""]
+    }
   ],
   education: [
     {
@@ -122,6 +132,67 @@ export function CVProvider({ children }) {
         bullets: exp[expIndex].bullets.filter((_, i) => i !== bulletIndex),
       };
       return { ...prev, experience: exp };
+    });
+  }, []);
+
+  const updateProject = useCallback((index, field, value) => {
+    setCvData((prev) => {
+      const proj = [...prev.projects];
+      proj[index] = { ...proj[index], [field]: value };
+      return { ...prev, projects: proj };
+    });
+  }, []);
+
+  const addProject = useCallback(() => {
+    setCvData((prev) => ({
+      ...prev,
+      projects: [
+        ...prev.projects,
+        {
+          id: crypto.randomUUID(),
+          name: '',
+          technologies: '',
+          startDate: '',
+          endDate: '',
+          bullets: [''],
+        },
+      ],
+    }));
+  }, []);
+
+  const removeProject = useCallback((index) => {
+    setCvData((prev) => ({
+      ...prev,
+      projects: prev.projects.filter((_, i) => i !== index),
+    }));
+  }, []);
+
+  const updateProjectBullet = useCallback((projIndex, bulletIndex, value) => {
+    setCvData((prev) => {
+      const proj = [...prev.projects];
+      const bullets = [...proj[projIndex].bullets];
+      bullets[bulletIndex] = value;
+      proj[projIndex] = { ...proj[projIndex], bullets };
+      return { ...prev, projects: proj };
+    });
+  }, []);
+
+  const addProjectBullet = useCallback((projIndex) => {
+    setCvData((prev) => {
+      const proj = [...prev.projects];
+      proj[projIndex] = { ...proj[projIndex], bullets: [...proj[projIndex].bullets, ''] };
+      return { ...prev, projects: proj };
+    });
+  }, []);
+
+  const removeProjectBullet = useCallback((projIndex, bulletIndex) => {
+    setCvData((prev) => {
+      const proj = [...prev.projects];
+      proj[projIndex] = {
+        ...proj[projIndex],
+        bullets: proj[projIndex].bullets.filter((_, i) => i !== bulletIndex),
+      };
+      return { ...prev, projects: proj };
     });
   }, []);
 
@@ -233,6 +304,12 @@ export function CVProvider({ children }) {
         updateExperienceBullet,
         addExperienceBullet,
         removeExperienceBullet,
+        updateProject,
+        addProject,
+        removeProject,
+        updateProjectBullet,
+        addProjectBullet,
+        removeProjectBullet,
         updateEducation,
         addEducation,
         removeEducation,

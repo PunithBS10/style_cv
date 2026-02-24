@@ -12,7 +12,7 @@ const colors = {
 };
 
 const s = StyleSheet.create({
-    page: { fontFamily: 'Helvetica', fontSize: 9, color: colors.textPrimary },
+    page: { fontFamily: 'Helvetica', fontSize: 9, color: colors.textPrimary, paddingBottom: 24, paddingTop: 24 },
     // Sidebar elements
     sidebarSectionTitle: { fontSize: 10, fontFamily: 'Helvetica-Bold', letterSpacing: 1.5, marginBottom: 6, marginTop: 14, color: colors.sidebarText },
     sidebarDivider: { height: 1, backgroundColor: 'rgba(255,255,255,0.15)', marginBottom: 8 },
@@ -45,6 +45,7 @@ export default function ExecutiveTemplate({ data }) {
     const d = data || {};
     const p = d.personalInfo || {};
     const exp = (d.experience || []).filter(e => e.jobTitle || e.company);
+    const projects = (d.projects || []).filter(p => p.name || p.technologies);
     const edu = (d.education || []).filter(e => e.degree || e.institution);
     const skills = d.skills || {};
     const certs = (d.certifications || []).filter(c => c && c.trim());
@@ -222,6 +223,29 @@ export default function ExecutiveTemplate({ data }) {
                                             </Text>
                                         </View>
                                         {(e.bullets || []).filter(b => b && b.trim()).map((b, bi) => (
+                                            <View key={bi} style={s.bulletItem} wrap={false}>
+                                                <Text style={s.bulletDot}>•</Text>
+                                                <Text style={s.bulletText}>{b}</Text>
+                                            </View>
+                                        ))}
+                                    </View>
+                                ))}
+                            </View>
+                        )}
+
+                        {/* Projects */}
+                        {projects.length > 0 && (
+                            <View>
+                                {projects.map((proj, i) => (
+                                    <View key={i} style={s.expBlock}>
+                                        <View wrap={false}>
+                                            {i === 0 && <Text style={s.mainSectionTitle}>PROJECTS</Text>}
+                                            <Text style={s.expTitle}>{proj.name}</Text>
+                                            <Text style={s.expCompany}>
+                                                {proj.technologies}{proj.startDate ? ` (${proj.startDate}` : ''}{proj.endDate ? ` – ${proj.endDate})` : proj.startDate ? ')' : ''}
+                                            </Text>
+                                        </View>
+                                        {(proj.bullets || []).filter(b => b && b.trim()).map((b, bi) => (
                                             <View key={bi} style={s.bulletItem} wrap={false}>
                                                 <Text style={s.bulletDot}>•</Text>
                                                 <Text style={s.bulletText}>{b}</Text>

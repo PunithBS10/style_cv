@@ -47,6 +47,15 @@ export async function parseUploadedCV(fileText) {
       "bullets": [""]
     }
   ],
+  "projects": [
+    {
+      "name": "",
+      "technologies": "",
+      "startDate": "",
+      "endDate": "",
+      "bullets": [""]
+    }
+  ],
   "education": [
     {
       "degree": "",
@@ -98,6 +107,12 @@ CRITICAL RULES FOR SKILLS:
             id: crypto.randomUUID(),
         }));
     }
+    if (parsed.projects) {
+        parsed.projects = parsed.projects.map((proj) => ({
+            ...proj,
+            id: crypto.randomUUID(),
+        }));
+    }
 
     return parsed;
 }
@@ -127,6 +142,7 @@ Return ONLY valid JSON matching this structure:
 {
   "personalInfo": { "fullName": "", "title": "", "email": "", "phone": "", "location": "", "linkedin": "", "portfolio": "", "github": "", "summary": "" },
   "experience": [{ "id": "", "jobTitle": "", "company": "", "startDate": "", "endDate": "", "current": false, "bullets": [""] }],
+  "projects": [{ "id": "", "name": "", "technologies": "", "startDate": "", "endDate": "", "bullets": [""] }],
   "education": [{ "id": "", "degree": "", "institution": "", "graduationDate": "", "gpa": "" }],
   "skills": { "programmingLanguages": "", "languages": "", "frameworks": "", "devops": "", "databases": "", "other": "" },
   "certifications": [""],

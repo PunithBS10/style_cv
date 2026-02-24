@@ -7,6 +7,7 @@ export default function InputPage() {
     const {
         cvData, updatePersonalInfo, updateSkills,
         addExperience, updateExperience, removeExperience,
+        addProject, updateProject, removeProject,
         addEducation, updateEducation, removeEducation,
         updateCertifications, addCertification, removeCertification,
         updateHobbies, addHobby, removeHobby,
@@ -15,6 +16,7 @@ export default function InputPage() {
 
     const p = cvData.personalInfo || {};
     const exp = cvData.experience || [];
+    const proj = cvData.projects || [];
     const edu = cvData.education || [];
     const skills = cvData.skills || {};
     const certs = cvData.certifications || [''];
@@ -39,6 +41,22 @@ export default function InputPage() {
     const removeBullet = (expIndex, bulletIndex) => {
         const updated = (exp[expIndex].bullets || []).filter((_, i) => i !== bulletIndex);
         updateExperience(expIndex, 'bullets', updated);
+    };
+
+    const addProjBullet = (projIndex) => {
+        const updated = [...(proj[projIndex].bullets || []), ''];
+        updateProject(projIndex, 'bullets', updated);
+    };
+
+    const updateProjBullet = (projIndex, bulletIndex, value) => {
+        const updated = [...(proj[projIndex].bullets || [])];
+        updated[bulletIndex] = value;
+        updateProject(projIndex, 'bullets', updated);
+    };
+
+    const removeProjBullet = (projIndex, bulletIndex) => {
+        const updated = (proj[projIndex].bullets || []).filter((_, i) => i !== bulletIndex);
+        updateProject(projIndex, 'bullets', updated);
     };
 
     return (
@@ -140,6 +158,53 @@ export default function InputPage() {
             ))}
             <button className="btn btn-secondary" onClick={addExperience} style={{ marginBottom: '1rem' }}>
                 <Plus size={14} /> Add Experience
+            </button>
+
+            {/* PROJECTS */}
+            <div className="section-divider">
+                <div className="section-divider-line" />
+                <span className="section-divider-label"><FileText size={12} /> Projects</span>
+                <div className="section-divider-line" />
+            </div>
+            {proj.map((p, i) => (
+                <div className="card" key={p.id || i} style={{ marginBottom: '0.75rem', position: 'relative' }}>
+                    <button className="btn btn-danger" onClick={() => removeProject(i)} style={{ position: 'absolute', top: '0.6rem', right: '0.6rem', padding: '0.25rem 0.5rem', fontSize: '0.7rem' }}>
+                        <Trash2 size={12} />
+                    </button>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                        <div className="form-group">
+                            <label className="form-label">Project Name</label>
+                            <input className="form-input" value={p.name || ''} onChange={ev => updateProject(i, 'name', ev.target.value)} placeholder="E-commerce App" />
+                        </div>
+                        <div className="form-group">
+                            <label className="form-label">Technologies Used</label>
+                            <input className="form-input" value={p.technologies || ''} onChange={ev => updateProject(i, 'technologies', ev.target.value)} placeholder="React, Node.js, MongoDB" />
+                        </div>
+                        <div className="form-group">
+                            <label className="form-label">Start Date</label>
+                            <input className="form-input" value={p.startDate || ''} onChange={ev => updateProject(i, 'startDate', ev.target.value)} placeholder="Jan 2022" />
+                        </div>
+                        <div className="form-group">
+                            <label className="form-label">End Date</label>
+                            <input className="form-input" value={p.endDate || ''} onChange={ev => updateProject(i, 'endDate', ev.target.value)} placeholder="Present" />
+                        </div>
+                    </div>
+                    <div style={{ marginTop: '0.25rem' }}>
+                        <label className="form-label">Key achievements / Info</label>
+                        {(p.bullets || ['']).map((b, bi) => (
+                            <div key={bi} style={{ display: 'flex', gap: '0.4rem', marginBottom: '0.4rem' }}>
+                                <input className="form-input" value={b} onChange={ev => updateProjBullet(i, bi, ev.target.value)} placeholder="Describe the project..." style={{ flex: 1 }} />
+                                {(p.bullets || []).length > 1 && (
+                                    <button className="btn btn-ghost" onClick={() => removeProjBullet(i, bi)} style={{ padding: '0.3rem', color: 'var(--error)' }}><Trash2 size={13} /></button>
+                                )}
+                            </div>
+                        ))}
+                        <button className="btn btn-ghost" onClick={() => addProjBullet(i)} style={{ fontSize: '0.78rem' }}><Plus size={13} /> Add bullet</button>
+                    </div>
+                </div>
+            ))}
+            <button className="btn btn-secondary" onClick={addProject} style={{ marginBottom: '1rem' }}>
+                <Plus size={14} /> Add Project
             </button>
 
             {/* EDUCATION */}

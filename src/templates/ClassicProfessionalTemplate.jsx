@@ -46,6 +46,7 @@ export default function ClassicProfessionalTemplate({ data }) {
     const d = data || {};
     const p = d.personalInfo || {};
     const exp = (d.experience || []).filter(e => e.jobTitle || e.company);
+    const projects = (d.projects || []).filter(p => p.name || p.technologies);
     const edu = (d.education || []).filter(e => e.degree || e.institution);
     const skills = d.skills || {};
     const certs = (d.certifications || []).filter(c => c && c.trim());
@@ -104,6 +105,32 @@ export default function ClassicProfessionalTemplate({ data }) {
                                 </View>
                                 {(e.bullets || []).filter(b => b && b.trim()).map((b, bi) => (
                                     <View key={bi} style={s.bulletItem}>
+                                        <Text style={s.bulletDot}>-</Text>
+                                        <Text style={s.bulletText}>{b}</Text>
+                                    </View>
+                                ))}
+                            </View>
+                        ))}
+                    </View>
+                )}
+
+                {/* Projects */}
+                {projects.length > 0 && (
+                    <View>
+                        {projects.map((proj, i) => (
+                            <View key={i} style={s.expBlock}>
+                                <View wrap={false}>
+                                    {i === 0 && <Text style={s.sectionTitle}>PROJECTS</Text>}
+                                    <View style={s.expHeader}>
+                                        <Text style={s.expTitle}>{proj.name}</Text>
+                                        <Text style={s.expDate}>
+                                            {proj.startDate}{proj.endDate ? ` – ${proj.endDate}` : ''}
+                                        </Text>
+                                    </View>
+                                    <Text style={s.expCompany}>{proj.technologies}</Text>
+                                </View>
+                                {(proj.bullets || []).filter(b => b && b.trim()).map((b, bi) => (
+                                    <View key={bi} style={s.bulletItem} wrap={false}>
                                         <Text style={s.bulletDot}>-</Text>
                                         <Text style={s.bulletText}>{b}</Text>
                                     </View>
