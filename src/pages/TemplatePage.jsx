@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCV } from '../context/CVContext';
 import { tailorCVForJob } from '../services/openaiService';
-import { ArrowRight, ArrowLeft, Loader, Sparkles, Check } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Loader, Sparkles, Check, ImagePlus, Trash2 } from 'lucide-react';
 
 const templates = [
     {
@@ -87,9 +87,30 @@ function MiniPreview({ template }) {
 
 export default function TemplatePage() {
     const navigate = useNavigate();
-    const { cvData, selectedTemplate, setSelectedTemplate, setTailoredData, jobDescription, setCurrentStep } = useCV();
+    const { cvData, selectedTemplate, setSelectedTemplate, setTailoredData, jobDescription, setCurrentStep, updatePersonalInfo } = useCV();
     const [tailoring, setTailoring] = useState(false);
     const [error, setError] = useState('');
+
+    const handlePhotoUpload = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            // Keep image small to fit in context/PDF limits, max 1MB
+            if (file.size > 1024 * 1024) {
+                setError('Please select an image smaller than 1MB');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                updatePersonalInfo('photoUrl', reader.result);
+                setError('');
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const removePhoto = () => {
+        updatePersonalInfo('photoUrl', '');
+    };
 
     const handleGenerate = async () => {
         try {
@@ -140,9 +161,41 @@ export default function TemplatePage() {
                             <span className="template-name">{t.name}</span>
                         </div>
                         <p className="template-desc">{t.desc}</p>
+
+                        {t.id === 'executive' && selectedTemplate === 'executive' && (
+                            <div style={{ marginTop: '1rem', paddingTop: '0.75rem', borderTop: '1px solid var(--border)' }} onClick={(e) => e.stopPropagation()}>
+                                {cvData.personalInfo.photoUrl ? (
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                            <img
+                                                src={cvData.personalInfo.photoUrl}
+                                                alt="Profile"
+                                                style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--border)' }}
+                                            />
+                                            <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Photo added</span>
+                                        </div>
+                                        <button className="btn btn-ghost" onClick={removePhoto} style={{ color: '#ef4444', padding: '0.25rem 0.5rem', minHeight: 'auto', fontSize: '0.8rem' }}>
+                                            <Trash2 size={12} style={{ marginRight: '4px' }} /> Remove
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <label className="btn btn-outline" style={{ cursor: 'pointer', display: 'flex', width: '100%', justifyContent: 'center', padding: '0.4rem', fontSize: '0.8rem', minHeight: 'auto' }}>
+                                        <ImagePlus size={14} style={{ marginRight: '6px' }} /> Add Profile Photo
+                                        <input
+                                            type="file"
+                                            accept="image/png, image/jpeg, image/jpg"
+                                            onChange={handlePhotoUpload}
+                                            style={{ display: 'none' }}
+                                        />
+                                    </label>
+                                )}
+                            </div>
+                        )}
                     </div>
                 ))}
             </div>
+
+
 
             {error && <div className="error-message" style={{ marginTop: '0.75rem' }}>{error}</div>}
 

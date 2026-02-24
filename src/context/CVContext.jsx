@@ -36,6 +36,7 @@ const emptyCV = {
     },
   ],
   skills: {
+    programmingLanguages: '',
     languages: '',
     frameworks: '',
     devops: '',
@@ -50,7 +51,7 @@ export function CVProvider({ children }) {
   const [cvData, setCvData] = useState(emptyCV);
   const [tailoredData, setTailoredData] = useState(null);
   const [jobDescription, setJobDescription] = useState('');
-  const [selectedTemplate, setSelectedTemplate] = useState('executive');
+  const [selectedTemplate, setSelectedTemplate] = useState('modern');
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingStatus, setProcessingStatus] = useState('');
   const [currentStep, setCurrentStep] = useState(0); // 0=home, 1=input, 2=template, 3=preview
@@ -204,7 +205,7 @@ export function CVProvider({ children }) {
     setCvData(emptyCV);
     setTailoredData(null);
     setJobDescription('');
-    setSelectedTemplate('executive');
+    setSelectedTemplate('modern');
     setCurrentStep(0);
   }, []);
 

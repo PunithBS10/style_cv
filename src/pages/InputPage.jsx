@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useCV } from '../context/CVContext';
-import { ArrowRight, ArrowLeft, Plus, Trash2, Briefcase, GraduationCap, User, Wrench, Award, Heart, FileText } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Plus, Trash2, Briefcase, GraduationCap, User, Wrench, Award, Heart, FileText, Globe } from 'lucide-react';
 
 export default function InputPage() {
     const navigate = useNavigate();
@@ -186,9 +186,10 @@ export default function InputPage() {
             <div className="card" style={{ marginBottom: '1rem' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
                     <div className="form-group">
-                        <label className="form-label">Languages</label>
-                        <input className="form-input" value={skills.languages || ''} onChange={e => updateSkills('languages', e.target.value)} placeholder="JavaScript, Python, Java" />
+                        <label className="form-label">Programming Languages</label>
+                        <input className="form-input" value={skills.programmingLanguages || ''} onChange={e => updateSkills('programmingLanguages', e.target.value)} placeholder="JavaScript, Python, Java" />
                     </div>
+
                     <div className="form-group">
                         <label className="form-label">Frameworks & Tools</label>
                         <input className="form-input" value={skills.frameworks || ''} onChange={e => updateSkills('frameworks', e.target.value)} placeholder="React, Node.js, Docker" />
@@ -226,6 +227,19 @@ export default function InputPage() {
                 <button className="btn btn-ghost" onClick={addCertification} style={{ fontSize: '0.78rem' }}><Plus size={13} /> Add certification</button>
             </div>
 
+            {/* LANGUAGES */}
+            <div className="section-divider">
+                <div className="section-divider-line" />
+                <span className="section-divider-label"><Globe size={12} /> Languages</span>
+                <div className="section-divider-line" />
+            </div>
+            <div className="card" style={{ marginBottom: '1rem' }}>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label">Spoken Languages</label>
+                    <input className="form-input" value={skills.languages || ''} onChange={e => updateSkills('languages', e.target.value)} placeholder="English, Kannada, Hindi" />
+                </div>
+            </div>
+
             {/* HOBBIES */}
             <div className="section-divider">
                 <div className="section-divider-line" />
@@ -250,9 +264,15 @@ export default function InputPage() {
                 <span className="section-divider-label"><FileText size={12} /> Target Job</span>
                 <div className="section-divider-line" />
             </div>
-            <div className="card" style={{ marginBottom: '1.5rem' }}>
+            <div className="card" style={{
+                marginBottom: '1.5rem',
+                borderColor: 'var(--primary)',
+                boxShadow: '0 4px 20px -4px rgba(0, 212, 255, 0.15), 0 0 0 1px rgba(0, 212, 255, 0.3)'
+            }}>
                 <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label className="form-label">Paste the job description (optional — enables AI tailoring)</label>
+                    <label className="form-label" style={{ color: 'var(--primary)' }}>
+                        Paste the job description (optional — enables AI tailoring)
+                    </label>
                     <textarea
                         className="form-textarea"
                         value={jobDescription || ''}

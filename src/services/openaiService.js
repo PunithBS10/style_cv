@@ -56,6 +56,7 @@ export async function parseUploadedCV(fileText) {
     }
   ],
   "skills": {
+    "programmingLanguages": "",
     "languages": "",
     "frameworks": "",
     "devops": "",
@@ -66,7 +67,14 @@ export async function parseUploadedCV(fileText) {
   "hobbies": [""]
 }
 
-Fill in as many fields as possible from the resume text. If a field is not found, leave it as empty string. For arrays, include at least one empty string if no items found. For experience bullets, extract the key accomplishments/responsibilities as separate items.`,
+Fill in as many fields as possible from the resume text. If a field is not found, leave it as empty string. For arrays, include at least one empty string if no items found. For experience bullets, extract the key accomplishments/responsibilities as separate items.
+
+CRITICAL RULES FOR SKILLS:
+- "programmingLanguages": ONLY programming/coding languages (e.g., Python, Java, C++, JavaScript).
+- "languages": ONLY spoken/human languages (e.g., English, Spanish, Hindi, German). DO NOT put technical terms like Unix, Shell, HTML, or CSS here.
+- "frameworks": Libraries, frameworks, and tools (e.g., React, Spring).
+- "devops": DevOps, cloud, and OS tools (e.g., AWS, Docker, Unix, Shell, Linux)
+- "databases": Database technologies (e.g., SQL, MongoDB).`,
             },
             {
                 role: 'user',
@@ -120,7 +128,7 @@ Return ONLY valid JSON matching this structure:
   "personalInfo": { "fullName": "", "title": "", "email": "", "phone": "", "location": "", "linkedin": "", "portfolio": "", "github": "", "summary": "" },
   "experience": [{ "id": "", "jobTitle": "", "company": "", "startDate": "", "endDate": "", "current": false, "bullets": [""] }],
   "education": [{ "id": "", "degree": "", "institution": "", "graduationDate": "", "gpa": "" }],
-  "skills": { "languages": "", "frameworks": "", "devops": "", "databases": "", "other": "" },
+  "skills": { "programmingLanguages": "", "languages": "", "frameworks": "", "devops": "", "databases": "", "other": "" },
   "certifications": [""],
   "hobbies": [""]
 }`,
