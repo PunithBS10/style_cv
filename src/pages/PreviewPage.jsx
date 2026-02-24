@@ -5,7 +5,7 @@ import { BlobProvider, PDFDownloadLink } from '@react-pdf/renderer';
 import ExecutiveTemplate from '../templates/ExecutiveTemplate';
 import ModernMinimalTemplate from '../templates/ModernMinimalTemplate';
 import ClassicProfessionalTemplate from '../templates/ClassicProfessionalTemplate';
-import { ArrowLeft, Download, RefreshCw, Eye, Loader } from 'lucide-react';
+import { ArrowLeft, Download, RefreshCw, Eye, Loader, Edit } from 'lucide-react';
 
 const templateMap = {
     executive: ExecutiveTemplate,
@@ -56,6 +56,9 @@ export default function PreviewPage() {
                     </p>
                 </div>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button className="btn btn-ghost" onClick={() => { setCurrentStep(1); navigate('/input'); }}>
+                        <Edit size={14} /> Edit details
+                    </button>
                     <button className="btn btn-ghost" onClick={handleBack}>
                         <ArrowLeft size={14} /> Change template
                     </button>

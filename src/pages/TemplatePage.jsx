@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCV } from '../context/CVContext';
 import { tailorCVForJob } from '../services/openaiService';
-import { ArrowRight, ArrowLeft, Loader, Sparkles, Check, ImagePlus, Trash2 } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Loader, Sparkles, Check, ImagePlus, Trash2, X } from 'lucide-react';
+import Cropper from 'react-easy-crop';
+import getCroppedImg from '../utils/cropImage';
 
 const templates = [
     {
@@ -91,21 +93,48 @@ export default function TemplatePage() {
     const [tailoring, setTailoring] = useState(false);
     const [error, setError] = useState('');
 
+    // Cropper State
+    const [imageSrc, setImageSrc] = useState(null);
+    const [crop, setCrop] = useState({ x: 0, y: 0 });
+    const [zoom, setZoom] = useState(1);
+    const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
+
     const handlePhotoUpload = (e) => {
         const file = e.target.files[0];
         if (file) {
-            // Keep image small to fit in context/PDF limits, max 1MB
-            if (file.size > 1024 * 1024) {
-                setError('Please select an image smaller than 1MB');
+            if (file.size > 1024 * 1024 * 5) {
+                setError('Please select an image smaller than 5MB');
                 return;
             }
             const reader = new FileReader();
             reader.onloadend = () => {
-                updatePersonalInfo('photoUrl', reader.result);
+                setImageSrc(reader.result);
                 setError('');
             };
             reader.readAsDataURL(file);
         }
+    };
+
+    const onCropComplete = (croppedArea, croppedAreaPixels) => {
+        setCroppedAreaPixels(croppedAreaPixels);
+    };
+
+    const showCroppedImage = async () => {
+        try {
+            const croppedImage = await getCroppedImg(
+                imageSrc,
+                croppedAreaPixels
+            );
+            updatePersonalInfo('photoUrl', croppedImage);
+            setImageSrc(null); // Close modal
+        } catch (e) {
+            console.error(e);
+            setError('Failed to crop image.');
+        }
+    };
+
+    const cancelCrop = () => {
+        setImageSrc(null);
     };
 
     const removePhoto = () => {
@@ -145,6 +174,56 @@ export default function TemplatePage() {
             <p className="section-subtitle">
                 Each template is ATS-compatible and optimized for professional presentation.
             </p>
+
+            {/* Cropper Modal Overlay */}
+            {imageSrc && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                    backgroundColor: 'rgba(0,0,0,0.8)', zIndex: 1000,
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                    padding: '2rem'
+                }}>
+                    <div style={{ background: 'var(--bg-white)', width: '100%', maxWidth: 400, borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
+                        <div style={{ padding: '1rem', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <h3 style={{ fontSize: '1rem', fontWeight: 600 }}>Adjust Photo</h3>
+                            <button className="btn btn-ghost" onClick={cancelCrop} style={{ padding: '0.25rem' }}>
+                                <X size={18} />
+                            </button>
+                        </div>
+                        <div style={{ position: 'relative', width: '100%', height: 300, background: '#333' }}>
+                            <Cropper
+                                image={imageSrc}
+                                crop={crop}
+                                zoom={zoom}
+                                aspect={1}
+                                cropShape="round"
+                                showGrid={false}
+                                onCropChange={setCrop}
+                                onCropComplete={onCropComplete}
+                                onZoomChange={setZoom}
+                            />
+                        </div>
+                        <div style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                            <input
+                                type="range"
+                                value={zoom}
+                                min={1}
+                                max={3}
+                                step={0.1}
+                                aria-labelledby="Zoom"
+                                onChange={(e) => {
+                                    setZoom(e.target.value)
+                                }}
+                                style={{ width: '100%' }}
+                            />
+                            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                                <button className="btn btn-secondary" onClick={cancelCrop}>Cancel</button>
+                                <button className="btn btn-primary" onClick={showCroppedImage}>Apply Photo</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <div className="template-grid">
                 {templates.map((t) => (
