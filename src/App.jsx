@@ -10,7 +10,7 @@ import PreviewPage from './pages/PreviewPage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import ProfilePage from './pages/ProfilePage';
-import { Sun, Moon, LogOut, User } from 'lucide-react';
+import { Sun, Moon, LogOut, User, Home } from 'lucide-react';
 
 const steps = [
   { label: 'Info', path: '/' },
@@ -81,11 +81,22 @@ function Navbar() {
   return (
     <nav className="navbar">
       <div className="navbar-inner">
-        <div className="navbar-brand" onClick={handleReset}>
-          <div className="navbar-logo">S</div>
-          <div className="navbar-title">Style<span>CV</span></div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div className="navbar-brand" onClick={handleReset} style={{ gap: '6px' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-end', fontWeight: 'bold' }}>
+              <span style={{ color: '#3b82f6', fontSize: '1.8rem', fontStyle: 'italic', marginRight: '3px', fontFamily: 'serif' }}>Style</span>
+              <span style={{ color: 'var(--text-primary)', fontSize: '1.5rem', display: 'flex', alignItems: 'center', lineHeight: 1, marginBottom: '3px', fontWeight: 900 }}>
+                <span>CV</span>
+              </span>
+            </div>
+          </div>
+
+          <button className="btn btn-ghost" onClick={() => navigate('/')} title="Home Page" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '0.4rem 0.6rem' }}>
+            <Home size={16} />
+            <span style={{ fontSize: '0.95rem', fontWeight: 500 }}>Home</span>
+          </button>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginLeft: 'auto' }}>
           {user && (
             <div className="navbar-steps">
               {steps.map((step, i) => (

@@ -1,9 +1,20 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCV } from '../context/CVContext';
-import { ArrowRight, ArrowLeft, Plus, Trash2, Briefcase, GraduationCap, User, Wrench, Award, Heart, FileText, Globe } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { saveResume, getUserResumes } from '../services/resumeService';
+import { ArrowRight, ArrowLeft, Plus, Trash2, Briefcase, GraduationCap, User, Wrench, Award, Heart, FileText, Globe, X, AlertCircle } from 'lucide-react';
 
 export default function InputPage() {
     const navigate = useNavigate();
+    const { user, isPremium } = useAuth();
+    const [saveForFuture, setSaveForFuture] = useState(false);
+    const [showSaveModal, setShowSaveModal] = useState(false);
+    const [saveNameInput, setSaveNameInput] = useState('');
+    const [saveName, setSaveName] = useState('');
+    const [isSavingLocal, setIsSavingLocal] = useState(false);
+    const [showLimitModal, setShowLimitModal] = useState(false);
+    const [isCheckingLimit, setIsCheckingLimit] = useState(false);
     const {
         cvData, updatePersonalInfo, updateSkills,
         addExperience, updateExperience, removeExperience,
@@ -323,6 +334,55 @@ export default function InputPage() {
                 <button className="btn btn-ghost" onClick={addHobby} style={{ fontSize: '0.78rem' }}><Plus size={13} /> Add interest</button>
             </div>
 
+            {user && (
+                <div style={{
+                    marginBottom: '1.5rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '10px',
+                    padding: '0.85rem',
+                    backgroundColor: 'rgba(0, 212, 255, 0.05)',
+                    border: '1px solid rgba(0, 212, 255, 0.2)',
+                    borderRadius: '8px'
+                }}>
+                    <input
+                        type="checkbox"
+                        id="saveForFuture"
+                        checked={saveForFuture}
+                        onChange={async (e) => {
+                            if (e.target.checked) {
+                                setIsCheckingLimit(true);
+                                try {
+                                    const resumes = await getUserResumes(user.id);
+                                    if (!isPremium && resumes.length >= 3) {
+                                        setShowLimitModal(true);
+                                        setSaveForFuture(false);
+                                    } else {
+                                        const defaultName = p.fullName ? `${p.fullName} (${new Date().toLocaleDateString()})` : `Saved CV ${new Date().toLocaleDateString()}`;
+                                        setSaveNameInput(defaultName);
+                                        setShowSaveModal(true);
+                                    }
+                                } catch (error) {
+                                    console.error("Error checking resume limit:", error);
+                                    alert("Could not verify resume limit. Please try again later.");
+                                    setSaveForFuture(false);
+                                } finally {
+                                    setIsCheckingLimit(false);
+                                }
+                            } else {
+                                setSaveForFuture(false);
+                            }
+                        }}
+                        disabled={isCheckingLimit}
+                        style={{ width: '18px', height: '18px', accentColor: 'var(--primary)', cursor: isCheckingLimit ? 'wait' : 'pointer' }}
+                    />
+                    <label htmlFor="saveForFuture" style={{ fontSize: '0.95rem', cursor: 'pointer', color: 'var(--text-primary)', fontWeight: 500 }}>
+                        Save CV details for future use
+                    </label>
+                </div>
+            )}
+
             {/* JOB DESCRIPTION */}
             <div className="section-divider">
                 <div className="section-divider-line" />
@@ -356,6 +416,182 @@ export default function InputPage() {
                     Choose template <ArrowRight size={14} />
                 </button>
             </div>
+
+            {/* CUSTOM SAVE MODAL */}
+            {showSaveModal && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0, left: 0, right: 0, bottom: 0,
+                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                    backdropFilter: 'blur(4px)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 9999,
+                    padding: '1rem'
+                }}>
+                    <div className="card" style={{
+                        maxWidth: 420,
+                        width: '100%',
+                        position: 'relative',
+                        animation: 'slideUp 0.3s ease-out'
+                    }}>
+                        <button
+                            onClick={() => { setSaveForFuture(false); setShowSaveModal(false); }}
+                            style={{
+                                position: 'absolute',
+                                top: '1rem',
+                                right: '1rem',
+                                background: 'none',
+                                border: 'none',
+                                color: 'var(--text-muted)',
+                                cursor: 'pointer',
+                                padding: '0.2rem'
+                            }}
+                        >
+                            <X size={18} />
+                        </button>
+
+                        <div style={{ textAlign: 'center', marginBottom: '1.5rem', marginTop: '1rem' }}>
+                            <h2 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>Save CV Details</h2>
+                            <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.5 }}>
+                                Enter a name for your saved CV to easily recognize it later.
+                            </p>
+                        </div>
+
+                        <div className="form-group">
+                            <input
+                                type="text"
+                                className="form-input"
+                                value={saveNameInput}
+                                onChange={(e) => setSaveNameInput(e.target.value)}
+                                placeholder="e.g. Software Engineer 2026"
+                                autoFocus
+                            />
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
+                            <button
+                                className="btn btn-secondary"
+                                style={{ flex: 1, justifyContent: 'center' }}
+                                onClick={() => { setSaveForFuture(false); setShowSaveModal(false); }}
+                                disabled={isSavingLocal}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className="btn btn-primary"
+                                style={{ flex: 1, justifyContent: 'center' }}
+                                disabled={isSavingLocal}
+                                onClick={async () => {
+                                    if (!saveNameInput.trim()) {
+                                        alert("Please enter a name.");
+                                        return;
+                                    }
+                                    setIsSavingLocal(true);
+                                    try {
+                                        await saveResume(user.id, saveNameInput.trim(), cvData);
+                                        setSaveName(saveNameInput.trim());
+                                        setSaveForFuture(true);
+                                        setShowSaveModal(false);
+                                    } catch (error) {
+                                        console.error("Error saving resume:", error);
+                                        alert("Failed to save: " + error.message);
+                                    } finally {
+                                        setIsSavingLocal(false);
+                                    }
+                                }}
+                            >
+                                {isSavingLocal ? 'Saving...' : 'Confirm Save'}
+                            </button>
+                        </div>
+                    </div>
+                    <style>{`
+                        @keyframes slideUp {
+                            from { opacity: 0; transform: translateY(20px); }
+                            to { opacity: 1; transform: translateY(0); }
+                        }
+                    `}</style>
+                </div>
+            )}
+
+            {/* LIMIT MODAL */}
+            {showLimitModal && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0, left: 0, right: 0, bottom: 0,
+                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                    backdropFilter: 'blur(4px)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 9999,
+                    padding: '1rem'
+                }}>
+                    <div className="card" style={{
+                        maxWidth: 420,
+                        width: '100%',
+                        position: 'relative',
+                        animation: 'slideUp 0.3s ease-out'
+                    }}>
+                        <button
+                            onClick={() => setShowLimitModal(false)}
+                            style={{
+                                position: 'absolute',
+                                top: '1rem',
+                                right: '1rem',
+                                background: 'none',
+                                border: 'none',
+                                color: 'var(--text-muted)',
+                                cursor: 'pointer',
+                                padding: '0.2rem'
+                            }}
+                        >
+                            <X size={18} />
+                        </button>
+
+                        <div style={{ textAlign: 'center', marginBottom: '1.5rem', marginTop: '1rem' }}>
+                            <div style={{
+                                width: 48,
+                                height: 48,
+                                borderRadius: '50%',
+                                background: 'var(--error-bg)',
+                                color: 'var(--error)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                margin: '0 auto 1rem'
+                            }}>
+                                <AlertCircle size={24} />
+                            </div>
+                            <h2 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>Storage Limit Reached</h2>
+                            <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.5 }}>
+                                You have reached the maximum limit of 3 saved CVs. Please go to your profile and delete an old CV before saving a new one.
+                            </p>
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem', flexDirection: 'column' }}>
+                            <button
+                                className="btn btn-primary btn-lg"
+                                style={{ width: '100%', justifyContent: 'center' }}
+                                onClick={() => {
+                                    setShowLimitModal(false);
+                                    navigate('/profile');
+                                }}
+                            >
+                                <User size={16} /> Go to Profile Dashboard
+                            </button>
+                            <button
+                                className="btn btn-ghost"
+                                style={{ width: '100%', justifyContent: 'center' }}
+                                onClick={() => setShowLimitModal(false)}
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

@@ -7,6 +7,7 @@ export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
     const [session, setSession] = useState(null);
     const [loadingAuth, setLoadingAuth] = useState(true);
+    const [recoveryMode, setRecoveryMode] = useState(false);
 
     useEffect(() => {
         // Get initial session
@@ -17,7 +18,10 @@ export function AuthProvider({ children }) {
         });
 
         // Listen for auth changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+            if (event === 'PASSWORD_RECOVERY') {
+                setRecoveryMode(true);
+            }
             setSession(session);
             setUser(session?.user || null);
             setLoadingAuth(false);
@@ -42,6 +46,12 @@ export function AuthProvider({ children }) {
         return supabase.auth.updateUser({ password: newPassword });
     };
 
+    const resetPassword = async (email) => {
+        return supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: `${window.location.origin}/profile`,
+        });
+    };
+
     const deleteAccount = async () => {
         // Note: Supabase requires a Postgres RPC function or Server/Service-Role key 
         // to actually delete a user from auth.users. 
@@ -51,11 +61,26 @@ export function AuthProvider({ children }) {
         return signOut();
     };
 
+    const unlockPremium = async (code) => {
+        if (code === 'STYLECV_PRO' || code === 'UNLIMITED2026') {
+            const { data, error } = await supabase.auth.updateUser({
+                data: { isPremium: true }
+            });
+            if (error) throw error;
+            setUser(data.user);
+            return true;
+        }
+        return false;
+    };
+
+    const isPremium = user?.user_metadata?.isPremium === true;
+
     return (
         <AuthContext.Provider value={{
-            user, session, loadingAuth,
+            user, session, loadingAuth, isPremium,
+            recoveryMode, setRecoveryMode,
             signUp, signIn, signOut,
-            updatePassword, deleteAccount
+            updatePassword, deleteAccount, unlockPremium, resetPassword
         }}>
             {!loadingAuth && children}
         </AuthContext.Provider>

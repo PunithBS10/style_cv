@@ -1,21 +1,48 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDropzone } from 'react-dropzone';
 import { useCV } from '../context/CVContext';
 import { parseUploadedCV, extractTextFromPDF, extractTextFromDOCX } from '../services/openaiService';
 import { useAuth } from '../context/AuthContext';
+import { getUserResumes } from '../services/resumeService';
 import AuthModal from '../components/AuthModal';
-import { Upload, FileText, ArrowRight, Loader, AlertCircle, ArrowLeft } from 'lucide-react';
+import { Upload, FileText, ArrowRight, Loader, AlertCircle, ArrowLeft, Clock, X, Sparkles } from 'lucide-react';
 
 export default function UploadPage() {
     const navigate = useNavigate();
     const { setCvData, setCurrentStep, setIsProcessing } = useCV();
-    const { user } = useAuth();
+    const { user, isPremium } = useAuth();
     const [file, setFile] = useState(null);
     const [status, setStatus] = useState('idle');
     const [error, setError] = useState('');
     const [progress, setProgress] = useState(0);
     const [showAuthModal, setShowAuthModal] = useState(false);
+    const [showLimitModal, setShowLimitModal] = useState(false);
+    const [savedResumes, setSavedResumes] = useState([]);
+    const [loadingResumes, setLoadingResumes] = useState(false);
+
+    useEffect(() => {
+        if (user) {
+            const fetchResumes = async () => {
+                setLoadingResumes(true);
+                try {
+                    const resumes = await getUserResumes(user.id);
+                    setSavedResumes(resumes);
+                } catch (err) {
+                    console.error("Failed to load saved resumes:", err);
+                } finally {
+                    setLoadingResumes(false);
+                }
+            };
+            fetchResumes();
+        }
+    }, [user]);
+
+    const loadSavedResume = (resume) => {
+        setCvData(resume.cv_data);
+        setCurrentStep(1);
+        navigate('/input');
+    };
 
     const onDrop = useCallback((accepted, rejected) => {
         if (rejected.length > 0) {
@@ -42,13 +69,22 @@ export default function UploadPage() {
     const handleParse = async () => {
         if (!file) return;
 
-        // Check Freemium Limit
-        if (!user) {
-            const currentTries = parseInt(localStorage.getItem('freeCvTries') || '0', 10);
-            if (currentTries >= 3) {
+        // Check Daily Limit (3 CVs per day for all users)
+        const today = new Date().toLocaleDateString();
+        const storedTries = JSON.parse(localStorage.getItem('dailyCvTries') || '{"count": 0, "date": ""}');
+
+        if (storedTries.date !== today) {
+            storedTries.date = today;
+            storedTries.count = 0;
+        }
+
+        if (!isPremium && storedTries.count >= 3) {
+            if (user) {
+                setShowLimitModal(true);
+            } else {
                 setShowAuthModal(true);
-                return;
             }
+            return;
         }
 
         try {
@@ -76,10 +112,10 @@ export default function UploadPage() {
             setStatus('done');
             setIsProcessing(false);
 
-            // Increment usage counter for guests on success
-            if (!user) {
-                const currentTries = parseInt(localStorage.getItem('freeCvTries') || '0', 10);
-                localStorage.setItem('freeCvTries', (currentTries + 1).toString());
+            // Increment daily usage counter for all users on success
+            if (!isPremium) {
+                const updatedTries = { date: today, count: storedTries.count + 1 };
+                localStorage.setItem('dailyCvTries', JSON.stringify(updatedTries));
             }
 
             setTimeout(() => {
@@ -95,13 +131,28 @@ export default function UploadPage() {
     };
 
     const skipToManual = () => {
-        if (!user) {
-            const currentTries = parseInt(localStorage.getItem('freeCvTries') || '0', 10);
-            if (currentTries >= 3) {
+        // Check Daily Limit
+        const today = new Date().toLocaleDateString();
+        const storedTries = JSON.parse(localStorage.getItem('dailyCvTries') || '{"count": 0, "date": ""}');
+
+        if (storedTries.date !== today) {
+            storedTries.date = today;
+            storedTries.count = 0;
+        }
+
+        if (!isPremium && storedTries.count >= 3) {
+            if (user) {
+                setShowLimitModal(true);
+            } else {
                 setShowAuthModal(true);
-                return;
             }
-            localStorage.setItem('freeCvTries', (currentTries + 1).toString());
+            return;
+        }
+
+        // Increment usage
+        if (!isPremium) {
+            const updatedTries = { date: today, count: storedTries.count + 1 };
+            localStorage.setItem('dailyCvTries', JSON.stringify(updatedTries));
         }
 
         setCurrentStep(1);
@@ -114,6 +165,35 @@ export default function UploadPage() {
             <p className="section-subtitle">
                 Drop your resume below and our AI will extract everything automatically.
             </p>
+
+            {user && savedResumes.length > 0 && (
+                <div style={{ marginBottom: '2rem' }}>
+                    <h3 style={{ fontSize: '1rem', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <Clock size={16} /> Use a Saved Resume
+                    </h3>
+                    <select
+                        className="form-input"
+                        style={{ cursor: 'pointer', appearance: 'auto' }}
+                        onChange={(e) => {
+                            const r = savedResumes.find(x => x.id === e.target.value);
+                            if (r) loadSavedResume(r);
+                        }}
+                        defaultValue=""
+                    >
+                        <option value="" disabled>Select a saved resume...</option>
+                        {savedResumes.map(resume => (
+                            <option key={resume.id} value={resume.id}>
+                                {resume.name} ({new Date(resume.created_at).toLocaleDateString()})
+                            </option>
+                        ))}
+                    </select>
+                    <div className="section-divider" style={{ margin: '1.5rem 0' }}>
+                        <div className="section-divider-line" />
+                        <span className="section-divider-label">OR</span>
+                        <div className="section-divider-line" />
+                    </div>
+                </div>
+            )}
 
             <div
                 {...getRootProps()}
@@ -198,6 +278,84 @@ export default function UploadPage() {
                 title="Free Limit Reached"
                 message="You've used your 3 free CV creations! Create a free account to save your progress, unlock unlimited CVs, and access all AI tailoring features."
             />
+
+            {/* DAILY LIMIT MODAL FOR USERS */}
+            {showLimitModal && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0, left: 0, right: 0, bottom: 0,
+                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                    backdropFilter: 'blur(4px)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 9999,
+                    padding: '1rem'
+                }}>
+                    <div className="card" style={{
+                        maxWidth: 420,
+                        width: '100%',
+                        position: 'relative',
+                        animation: 'slideUp 0.3s ease-out'
+                    }}>
+                        <button
+                            onClick={() => setShowLimitModal(false)}
+                            style={{
+                                position: 'absolute',
+                                top: '1rem',
+                                right: '1rem',
+                                background: 'none',
+                                border: 'none',
+                                color: 'var(--text-muted)',
+                                cursor: 'pointer',
+                                padding: '0.2rem'
+                            }}
+                        >
+                            <X size={18} />
+                        </button>
+
+                        <div style={{ textAlign: 'center', marginBottom: '1.5rem', marginTop: '1rem' }}>
+                            <div style={{
+                                width: 48,
+                                height: 48,
+                                borderRadius: '50%',
+                                background: 'var(--accent-light)',
+                                color: 'var(--accent)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                margin: '0 auto 1rem'
+                            }}>
+                                <Sparkles size={24} />
+                            </div>
+                            <h2 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>Daily Limit Reached</h2>
+                            <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.5 }}>
+                                You have used all 3 of your daily CV creations. Need more? Upgrade to Premium for unlimited AI parsing, saving, and tailoring.
+                            </p>
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem', flexDirection: 'column' }}>
+                            <button
+                                className="btn btn-primary btn-lg"
+                                style={{ width: '100%', justifyContent: 'center' }}
+                                onClick={() => {
+                                    setShowLimitModal(false);
+                                    navigate('/profile#premium');
+                                }}
+                            >
+                                <Sparkles size={16} /> View Premium Options
+                            </button>
+                            <button
+                                className="btn btn-ghost"
+                                style={{ width: '100%', justifyContent: 'center' }}
+                                onClick={() => setShowLimitModal(false)}
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
