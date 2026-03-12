@@ -24,7 +24,7 @@ const steps = [
 function ThemeToggle() {
   const [dark, setDark] = useState(() => {
     const saved = localStorage.getItem('theme');
-    return saved === 'dark';
+    return saved !== 'light'; // Default to dark unless explicitly set to 'light'
   });
 
   useEffect(() => {
@@ -85,10 +85,10 @@ function Navbar() {
       <div className="navbar-inner">
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <div className="navbar-brand" onClick={handleReset} style={{ gap: '6px' }}>
-            <div style={{ display: 'flex', alignItems: 'flex-end', fontWeight: 'bold' }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', fontWeight: 'bold' }}>
               <span style={{ color: '#3b82f6', fontSize: '1.8rem', fontStyle: 'italic', marginRight: '3px', fontFamily: 'serif' }}>Style</span>
-              <span style={{ color: 'var(--text-primary)', fontSize: '1.5rem', display: 'flex', alignItems: 'center', lineHeight: 1, marginBottom: '3px', fontWeight: 900 }}>
-                <span>CV</span>
+              <span style={{ color: 'var(--text-primary)', fontSize: '1.5rem', lineHeight: 1, fontWeight: 900 }}>
+                CV
               </span>
             </div>
           </div>
