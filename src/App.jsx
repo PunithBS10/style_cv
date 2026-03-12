@@ -10,6 +10,8 @@ import PreviewPage from './pages/PreviewPage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import ProfilePage from './pages/ProfilePage';
+import CoverLetterLandingPage from './pages/CoverLetterLandingPage';
+import CoverLetterPage from './pages/CoverLetterPage';
 import { Sun, Moon, LogOut, User, Home } from 'lucide-react';
 
 const steps = [
@@ -147,6 +149,9 @@ function AppRoutes() {
           <Route path="/input" element={<InputPage />} />
           <Route path="/templates" element={<TemplatePage />} />
           <Route path="/preview" element={<PreviewPage />} />
+
+          <Route path="/cover-letter-start" element={<CoverLetterLandingPage />} />
+          <Route path="/cover-letter" element={<CoverLetterPage />} />
         </Routes>
       </main>
     </>

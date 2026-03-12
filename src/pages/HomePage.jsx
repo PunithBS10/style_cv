@@ -27,12 +27,19 @@ export default function HomePage() {
                     <strong> tailor and customize</strong> your content to match any job description,
                     creating a perfect ATS-friendly PDF.
                 </p>
-                <div className="hero-buttons">
+                <div className="hero-buttons" style={{ flexWrap: 'wrap', justifyContent: 'center' }}>
                     <button className="btn btn-primary btn-lg" onClick={handleUpload}>
                         <Upload size={16} /> Upload Existing CV
                     </button>
                     <button className="btn btn-secondary btn-lg" onClick={handleManual}>
                         <FileText size={16} /> Start from scratch
+                    </button>
+                    <button
+                        className="btn btn-ghost btn-lg"
+                        onClick={() => navigate('/cover-letter-start')}
+                        style={{ border: '1px solid var(--border)', background: 'var(--bg-card)' }}
+                    >
+                        <FileText size={16} /> Create Cover Letter
                     </button>
                 </div>
             </div>

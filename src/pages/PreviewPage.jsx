@@ -5,7 +5,7 @@ import { BlobProvider, PDFDownloadLink } from '@react-pdf/renderer';
 import ExecutiveTemplate from '../templates/ExecutiveTemplate';
 import ModernMinimalTemplate from '../templates/ModernMinimalTemplate';
 import ClassicProfessionalTemplate from '../templates/ClassicProfessionalTemplate';
-import { ArrowLeft, Download, RefreshCw, Eye, Loader, Edit } from 'lucide-react';
+import { ArrowLeft, Download, RefreshCw, Eye, Loader, Edit, FileText } from 'lucide-react';
 
 const templateMap = {
     executive: ExecutiveTemplate,
@@ -68,16 +68,25 @@ export default function PreviewPage() {
                 </div>
             </div>
 
-            {/* Download */}
+            {/* Actions */}
             <div style={{
                 display: 'flex',
                 justifyContent: 'center',
+                flexWrap: 'wrap',
+                gap: '1rem',
                 marginBottom: '1.25rem',
                 padding: '1rem',
                 background: 'var(--bg-white)',
                 border: '1px solid var(--border)',
                 borderRadius: 'var(--radius)',
             }}>
+                <button
+                    className="btn btn-secondary btn-lg"
+                    onClick={() => navigate('/cover-letter')}
+                    style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
+                >
+                    <FileText size={14} /> Generate Matching Cover Letter ✨
+                </button>
                 <PDFDownloadLink document={pdfDocument} fileName={fileName}>
                     {({ loading }) => (
                         <button className="btn btn-primary btn-lg" disabled={loading}>
