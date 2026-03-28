@@ -42,6 +42,8 @@ const s = StyleSheet.create({
     hobbyText: { fontSize: 8, color: colors.textSecondary, lineHeight: 1.5 },
 });
 
+const getNameFontSize = (name, base) => Math.max(14, base - Math.max(0, (name.length - 18)) * 0.5);
+
 export default function ClassicProfessionalTemplate({ data }) {
     const d = data || {};
     const p = d.personalInfo || {};
@@ -63,7 +65,7 @@ export default function ClassicProfessionalTemplate({ data }) {
 
                 {/* Header */}
                 <View style={s.header}>
-                    <Text style={s.fullName}>{(p.fullName || 'YOUR NAME').toUpperCase()}</Text>
+                    <Text style={[s.fullName, { fontSize: getNameFontSize(p.fullName || 'YOUR NAME', 26) }]}>{(p.fullName || 'YOUR NAME').toUpperCase()}</Text>
                     <View style={s.goldLine} />
                     <Text style={s.jobTitle}>{(p.title || 'PROFESSIONAL TITLE').toUpperCase()}</Text>
                 </View>

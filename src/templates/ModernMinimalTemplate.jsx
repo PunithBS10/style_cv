@@ -40,6 +40,8 @@ const s = StyleSheet.create({
     certItem: { flexDirection: 'row', marginBottom: 2.5 },
 });
 
+const getNameFontSize = (name, base) => Math.max(14, base - Math.max(0, (name.length - 18)) * 0.5);
+
 export default function ModernMinimalTemplate({ data }) {
     const d = data || {};
     const p = d.personalInfo || {};
@@ -64,7 +66,7 @@ export default function ModernMinimalTemplate({ data }) {
         <Document>
             <Page size="A4" style={s.page}>
                 <View style={s.header}>
-                    <Text style={s.fullName}>{(p.fullName || 'YOUR NAME').toUpperCase()}</Text>
+                    <Text style={[s.fullName, { fontSize: getNameFontSize(p.fullName || 'YOUR NAME', 26) }]}>{(p.fullName || 'YOUR NAME').toUpperCase()}</Text>
                     <Text style={s.jobTitle}>{(p.title || 'PROFESSIONAL TITLE').toUpperCase()}</Text>
                 </View>
                 <View style={s.accentLine} />

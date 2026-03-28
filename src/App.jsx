@@ -21,6 +21,12 @@ const steps = [
   { label: 'Download', path: '/preview' },
 ];
 
+const coverLetterSteps = [
+  { label: 'Select CV', path: '/cover-letter-start' },
+  { label: 'Generate', path: '/cover-letter' },
+  { label: 'Download', path: '/cover-letter' },
+];
+
 function ThemeToggle() {
   const [dark, setDark] = useState(() => {
     const saved = localStorage.getItem('theme');
@@ -67,9 +73,18 @@ function Navbar() {
   const { currentStep, resetAll } = useCV();
   const { user, signOut } = useAuth();
 
+  const isCoverLetterFlow = ['/cover-letter-start', '/cover-letter'].includes(location.pathname);
+
   const getStepStatus = (index) => {
     const pathMap = { '/': 0, '/upload': 0, '/input': 1, '/templates': 2, '/preview': 3 };
     const currentIndex = pathMap[location.pathname] ?? 0;
+    if (index < currentIndex) return 'completed';
+    if (index === currentIndex) return 'active';
+    return '';
+  };
+
+  const getCoverLetterStepStatus = (index) => {
+    const currentIndex = location.pathname === '/cover-letter-start' ? 0 : 1;
     if (index < currentIndex) return 'completed';
     if (index === currentIndex) return 'active';
     return '';
@@ -101,10 +116,10 @@ function Navbar() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginLeft: 'auto' }}>
           {user && (
             <div className="navbar-steps">
-              {steps.map((step, i) => (
+              {(isCoverLetterFlow ? coverLetterSteps : steps).map((step, i) => (
                 <div key={step.label} style={{ display: 'flex', alignItems: 'center' }}>
                   {i > 0 && <div className="navbar-step-line" />}
-                  <div className={`navbar-step ${getStepStatus(i)}`}>
+                  <div className={`navbar-step ${isCoverLetterFlow ? getCoverLetterStepStatus(i) : getStepStatus(i)}`}>
                     <div className="navbar-step-dot" />
                     {step.label}
                   </div>

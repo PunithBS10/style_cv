@@ -14,20 +14,20 @@ export default function CoverLetterPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
-    // "saved" text drives the PDF; "draft" text is what the user edits live
-    const [savedText, setSavedText] = useState('');
-    const [draftText, setDraftText] = useState('');
+    // savedData drives the PDF; draftText is the editable body text
+    const [savedData, setSavedData] = useState(null);
+    const [draftBody, setDraftBody] = useState('');
 
-    const hasPendingChanges = draftText !== savedText;
+    const hasPendingChanges = savedData && draftBody !== savedData.body;
 
     const handleGenerate = async (e) => {
         e.preventDefault();
         setLoading(true);
         setError('');
         try {
-            const text = await generateCoverLetter(cvData, jobDescription);
-            setSavedText(text);
-            setDraftText(text);
+            const data = await generateCoverLetter(cvData, jobDescription);
+            setSavedData(data);
+            setDraftBody(data.body);
         } catch (err) {
             console.error(err);
             setError("Failed to generate cover letter. Ensure your API key is correct.");
@@ -37,13 +37,13 @@ export default function CoverLetterPage() {
     };
 
     const handleSaveChanges = () => {
-        setSavedText(draftText);
+        setSavedData({ ...savedData, body: draftBody });
     };
 
-    // PDF only recalculates when savedText changes (on save button click)
+    // PDF only recalculates when savedData changes (on save button click)
     const pdfDocument = useMemo(
-        () => <CoverLetterTemplate cvData={cvData} coverLetterText={savedText} />,
-        [cvData, savedText]
+        () => <CoverLetterTemplate cvData={cvData} coverLetterData={savedData} />,
+        [cvData, savedData]
     );
 
     const fileName = `${(cvData?.personalInfo?.fullName || 'cover_letter').replace(/\s+/g, '_')}_Cover_Letter.pdf`;
@@ -70,7 +70,7 @@ export default function CoverLetterPage() {
                 Our AI will analyze your CV and perfectly match it to this specific role.
             </p>
 
-            {!savedText ? (
+            {!savedData ? (
                 /* ── Form Section ── */
                 <div style={{ maxWidth: 600, margin: '0 auto' }}>
                     <div className="card">
@@ -119,7 +119,7 @@ export default function CoverLetterPage() {
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '1.1rem', fontWeight: 600 }}>
                             <CheckCircle2 color="var(--success)" size={18} /> Generated Successfully
                         </div>
-                        <button className="btn btn-ghost" onClick={() => { setSavedText(''); setDraftText(''); }}>
+                        <button className="btn btn-ghost" onClick={() => { setSavedData(null); setDraftBody(''); }}>
                             Regenerate
                         </button>
                     </div>
@@ -134,8 +134,8 @@ export default function CoverLetterPage() {
                         </label>
                         <textarea
                             className="form-textarea"
-                            value={draftText}
-                            onChange={(e) => setDraftText(e.target.value)}
+                            value={draftBody}
+                            onChange={(e) => setDraftBody(e.target.value)}
                             rows={14}
                             style={{ fontSize: '0.9rem', lineHeight: 1.6 }}
                         />
@@ -173,7 +173,7 @@ export default function CoverLetterPage() {
                         <Eye size={13} />
                         PDF Preview
                     </div>
-                    <BlobProvider document={pdfDocument} key={savedText}>
+                    <BlobProvider document={pdfDocument} key={JSON.stringify(savedData)}>
                         {({ url, loading: blobLoading, error: blobError }) => {
                             if (blobLoading) return <div className="card" style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '3rem' }}>Rendering preview...</div>;
                             if (blobError) {

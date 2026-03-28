@@ -35,6 +35,17 @@ const styles = StyleSheet.create({
         textAlign: 'right',
         marginBottom: 16,
     },
+    recipientBlock: {
+        marginBottom: 16,
+    },
+    recipientLine: {
+        fontSize: 10,
+        marginBottom: 2,
+    },
+    salutation: {
+        fontSize: 10,
+        marginBottom: 10,
+    },
     paragraph: {
         marginBottom: 10,
         textAlign: 'justify',
@@ -45,7 +56,7 @@ const styles = StyleSheet.create({
         marginTop: 20,
     },
     signOff: {
-        marginBottom: 20,
+        marginBottom: 8,
         fontSize: 10,
     },
     signName: {
@@ -55,11 +66,13 @@ const styles = StyleSheet.create({
     },
 });
 
-export default function CoverLetterTemplate({ cvData, coverLetterText }) {
+export default function CoverLetterTemplate({ cvData, coverLetterData }) {
     const { personalInfo } = cvData || {};
     const { fullName = '', email = '', phone = '', location = '' } = personalInfo || {};
 
-    const paragraphs = (coverLetterText || '').split('\n').filter(p => p.trim() !== '');
+    const { recipientName = '', company = '', salutation = '', body = '' } = coverLetterData || {};
+
+    const paragraphs = body.split('\n').filter(p => p.trim() !== '');
 
     const today = new Date().toLocaleDateString('en-US', {
         year: 'numeric',
@@ -81,10 +94,19 @@ export default function CoverLetterTemplate({ cvData, coverLetterText }) {
                 {/* Divider */}
                 <View style={styles.divider} />
 
-                {/* Date (right-aligned) */}
+                {/* Date */}
                 <Text style={styles.dateText}>{today}</Text>
 
-                {/* Body Paragraphs (includes recipient block from AI + letter body) */}
+                {/* Recipient Block */}
+                <View style={styles.recipientBlock}>
+                    {recipientName && <Text style={styles.recipientLine}>{recipientName}</Text>}
+                    {company && <Text style={styles.recipientLine}>{company}</Text>}
+                </View>
+
+                {/* Salutation */}
+                {salutation && <Text style={styles.salutation}>{salutation}</Text>}
+
+                {/* Body Paragraphs */}
                 <View>
                     {paragraphs.map((para, i) => (
                         <Text key={i} style={styles.paragraph}>

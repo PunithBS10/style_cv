@@ -181,7 +181,7 @@ export default function ProfilePage() {
                     <Sparkles size={16} /> Unlimited Premium Access
                 </h3>
                 {isPremium ? (
-                    <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.5)', borderRadius: '8px', border: '1px solid rgba(0, 0, 0, 0.05)', marginTop: '0.5rem' }}>
+                    <div style={{ padding: '1rem', background: 'var(--card-bg)', borderRadius: '8px', border: '1px solid var(--border)', marginTop: '0.5rem' }}>
                         <p style={{ color: 'var(--text-primary)', fontSize: '0.95rem', margin: 0, display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 500 }}>
                             <CheckCircle2 size={18} color="var(--success)" /> You have Unlimited Premium Access!
                         </p>

@@ -41,6 +41,13 @@ const s = StyleSheet.create({
     certItem: { flexDirection: 'row', marginBottom: 3, paddingLeft: 2 },
 });
 
+const getNameStyle = (name) => {
+    const len = name.length;
+    const fontSize = Math.max(13, 22 - Math.max(0, len - 16) * 0.5);
+    const letterSpacing = len > 20 ? Math.max(0, 2 - (len - 20) * 0.2) : 2;
+    return { fontSize, letterSpacing };
+};
+
 export default function ExecutiveTemplate({ data }) {
     const d = data || {};
     const p = d.personalInfo || {};
@@ -197,7 +204,7 @@ export default function ExecutiveTemplate({ data }) {
                     {/* Main Content Area */}
                     <View style={{ flex: 1, padding: '24px 22px' }}>
                         <View style={s.nameBlock}>
-                            <Text style={s.fullName}>{(p.fullName || 'YOUR NAME').toUpperCase()}</Text>
+                            <Text style={[s.fullName, getNameStyle(p.fullName || 'YOUR NAME')]}>{(p.fullName || 'YOUR NAME').toUpperCase()}</Text>
                             <Text style={s.jobTitle}>{(p.title || 'PROFESSIONAL TITLE').toUpperCase()}</Text>
                         </View>
                         <View style={s.accentLine} />

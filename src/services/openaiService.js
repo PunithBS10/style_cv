@@ -193,28 +193,30 @@ export async function generateCoverLetter(cvData, jobDescription) {
         messages: [
             {
                 role: 'system',
-                content: `You are an expert career coach and cover letter writer. Write a professional, tailored cover letter.
+                content: `You are an expert career coach and cover letter writer.
 
-Rules:
-1. Infer the Target Company, Target Job Title, and Hiring Manager name from the Job Description provided. If they cannot be inferred, use "Hiring Manager".
-2. Start the letter with the RECIPIENT block on its own lines:
-   - Line 1: Recipient name (e.g. "Anthony Smith" or "Hiring Manager")
-   - Line 2: Company name / address if known
-   - Then a blank line, then the salutation "Dear [Mr./Ms.] [Last Name]," or "Dear Hiring Manager,"
-3. Structure the body:
-   - One short opening paragraph stating the position applied for and enthusiasm.
-   - 2-3 short body paragraphs highlighting only the MOST relevant skills/experiences from the CV that match the job description.
-   - One short closing paragraph expressing enthusiasm and a call to action.
-4. Keep it VERY concise — under 200 words total for the body. Be punchy and impactful, not lengthy.
-5. Output just the raw text with paragraphs separated by exactly 2 newlines (\\n\\n). No markdown, no bolding, no asterisks.
-6. Do NOT include the sender's header (Name, Email, Phone) at the top — the PDF template handles that. Start directly with the recipient block.`,
+Return ONLY a valid JSON object with exactly these fields:
+{
+  "recipientName": "Hiring Manager name or 'Hiring Manager' if unknown",
+  "company": "Company name or empty string if unknown",
+  "salutation": "Dear Hiring Manager, (or Dear Mr./Ms. LastName,)",
+  "body": "Full letter body paragraphs separated by \\n\\n"
+}
+
+Rules for the body:
+- One short opening paragraph stating the position and enthusiasm.
+- 2-3 short paragraphs highlighting the MOST relevant skills from the CV that match the job.
+- One short closing paragraph with a call to action.
+- Under 200 words total. No markdown, no bolding, no asterisks.
+- Do NOT include sender info, recipient block, salutation, date, or sign-off in the body field — those are handled separately.`,
             },
             {
                 role: 'user',
                 content: `JOB DESCRIPTION:\n${jobDescription}\n\nCANDIDATE CV DATA:\n${JSON.stringify(cvData, null, 2)}`
             }
         ],
+        response_format: { type: 'json_object' },
     });
 
-    return response.choices[0].message.content.trim();
+    return JSON.parse(response.choices[0].message.content.trim());
 }
